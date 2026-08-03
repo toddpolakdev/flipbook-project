@@ -1,22 +1,98 @@
 .container {
-  max-width: 960px;
-  margin: 2rem auto;
-  padding: 1rem;
-  font-family: system-ui, sans-serif;
-  line-height: 1.6;
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem var(--gutter) 5rem;
+}
+
+.head {
+  text-align: center;
+  margin-bottom: 2.5rem;
 }
 
 .heading {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: clamp(1.75rem, 4.5vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .description {
-  margin-bottom: 2rem;
-  color: #555;
-  font-size: 1.1rem;
+  margin: 0.75rem auto 0;
+  max-width: 60ch;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.stage {
+  display: flex;
+  justify-content: center;
+  padding: clamp(1rem, 3vw, 2.25rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: radial-gradient(
+      ellipse 70% 55% at 50% 0%,
+      var(--primary-soft) 0%,
+      transparent 70%
+    ),
+    var(--background-alt);
 }
 
 .pageflipper {
   margin: 0 auto;
+}
+
+/* Status states ----------------------------------------------------------- */
+.state {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 440px;
+  margin: 7rem auto;
+  padding: 2.5rem 1.75rem;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.stateTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.stateBody {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+  overflow-wrap: anywhere;
+}
+
+.stateLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  height: 2.4rem;
+  padding: 0 1.05rem;
+  border-radius: var(--radius);
+  background: var(--gradient);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-primary);
+  transition: filter 0.16s var(--ease), transform 0.16s var(--ease);
+}
+
+.stateLink:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
 }

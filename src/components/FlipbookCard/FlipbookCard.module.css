@@ -1,55 +1,253 @@
 .card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  padding: 1rem;
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  transition: box-shadow 0.2s ease;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.2s var(--ease), transform 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
 }
 
 .card:hover {
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-line);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+/* Media ------------------------------------------------------------------- */
+.media {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  background: var(--muted);
+  overflow: hidden;
 }
 
 .thumbnail {
   width: 100%;
-  height: 160px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 0.5rem;
+  display: block;
+  transition: transform 0.4s var(--ease);
+}
+
+.card:hover .thumbnail {
+  transform: scale(1.04);
 }
 
 .placeholder {
-  width: 100%;
-  height: 160px;
-  background: #f3f4f6;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #777;
-  border-radius: 0.5rem;
+  gap: 0.4rem;
+  height: 100%;
+  color: var(--subtle);
+  font-size: 0.78rem;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    var(--primary-soft) 0%,
+    transparent 70%
+  );
 }
 
-.actions {
-  margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+/* Keeps the pills legible over any cover image. */
+.mediaScrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    transparent 35%,
+    transparent 70%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.2s var(--ease);
 }
 
-.actions a {
-  background: #e5e7eb;
+.media:has(.thumbnail) .mediaScrim {
+  opacity: 1;
+}
+
+/* Pills over the cover ---------------------------------------------------- */
+.badgePublic,
+.badgeDraft,
+.pageCount {
+  position: absolute;
+  z-index: 1;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+.badgePublic,
+.badgeDraft {
+  top: 0.6rem;
+  left: 0.6rem;
+}
+
+.badgePublic {
+  color: var(--success);
+  background: var(--success-soft);
+  border: 1px solid var(--success-line);
+}
+
+.badgeDraft {
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--background) 70%, transparent);
+  border: 1px solid var(--border-hi);
+}
+
+.pageCount {
+  bottom: 0.6rem;
+  right: 0.6rem;
   color: #fff;
-  padding: 0.5rem 0.9rem;
-  border-radius: 0.4rem;
-  font-size: 0.9rem;
-  text-decoration: none;
-  text-align: center;
+  background: rgba(9, 9, 11, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.grip {
+  position: absolute;
+  z-index: 1;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--background) 78%, transparent);
+  border: 1px solid var(--border-hi);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+.card:hover .grip,
+.grip:focus-visible {
+  opacity: 1;
+}
+
+.grip:hover {
+  color: var(--foreground);
+}
+
+.grip:active {
+  cursor: grabbing;
+}
+
+/* Body -------------------------------------------------------------------- */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem 0.75rem;
   flex: 1;
 }
 
-.actions a:hover {
-  background: #d1d5db;
-  color: #000;
+.title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.title a {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.16s var(--ease);
+}
+
+.title a:hover {
+  color: var(--primary-hi);
+}
+
+.description {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Actions ----------------------------------------------------------------- */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--card-hi);
+}
+
+.primaryAction,
+.ghostAction,
+.dangerAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s var(--ease), color 0.16s var(--ease),
+    border-color 0.16s var(--ease);
+}
+
+.primaryAction {
+  flex: 1;
+  background: var(--gradient);
+  color: #fff;
+}
+
+.primaryAction:hover {
+  filter: brightness(1.08);
+}
+
+.ghostAction {
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+
+.ghostAction:hover {
+  color: var(--foreground);
+  border-color: var(--border-hi);
+}
+
+.dangerAction {
+  width: 2rem;
+  padding: 0;
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+
+.dangerAction:hover {
+  color: var(--danger);
+  border-color: var(--danger-line);
+  background: var(--danger-soft);
 }

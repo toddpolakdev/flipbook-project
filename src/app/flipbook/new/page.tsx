@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -20,7 +19,6 @@ const CREATE_FLIPBOOK = gql`
 export default function NewFlipBookPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [showToast, setShowToast] = useState(false);
 
   const [createFlipBook] = useMutation(CREATE_FLIPBOOK, {
     // Invalidate cached lists so the new flipbook appears without a hard refresh.
@@ -74,14 +72,9 @@ export default function NewFlipBookPage() {
       },
     });
 
-    // Show success toast
-    setShowToast(true);
-
-    // Navigate to edit page after showing toast
-    setTimeout(() => {
-      setShowToast(false);
-      router.push(`/flipbook/${slug}/edit`);
-    }, 2000);
+    // FlipbookForm raises its own "saved" toast, and the Toaster lives in the
+    // root layout, so it survives this navigation.
+    router.push(`/flipbook/${slug}/edit`);
   };
 
   if (status === "loading") return <Loader />;
@@ -89,31 +82,10 @@ export default function NewFlipBookPage() {
     return <SignInPrompt message="Please sign in to create a flipbook." />;
 
   return (
-    <>
-      {/* Toast Message */}
-      {showToast && (
-        <div
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            background: "#10b981",
-            color: "white",
-            padding: "12px 24px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-            zIndex: 1000,
-            fontWeight: "600",
-          }}>
-          ✅ Flipbook created successfully!
-        </div>
-      )}
-
-      <FlipbookForm
-        heading="New flipbook"
-        initialValues={defaultFlipbookValues}
-        onSubmit={handleSubmit}
-      />
-    </>
+    <FlipbookForm
+      heading="New flipbook"
+      initialValues={defaultFlipbookValues}
+      onSubmit={handleSubmit}
+    />
   );
 }

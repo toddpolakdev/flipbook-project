@@ -484,9 +484,7 @@ export default function FlipbookForm({
           ) : (
             <div className={styles.emptyStage}>
               <Images size={40} />
-              <Text fw={600} c="dark">
-                No pages yet
-              </Text>
+              <Text fw={600}>No pages yet</Text>
               <Text size="sm">
                 Upload images or add one by URL from the Pages panel to preview
                 your flipbook here.

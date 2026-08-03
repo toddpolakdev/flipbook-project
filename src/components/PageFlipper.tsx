@@ -111,12 +111,12 @@ export default function PageFlipper({
                 style={{
                   width: "100%",
                   height: "100%",
-                  background: "#f3f4f6",
+                  background: "var(--muted)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: "0.9rem",
-                  color: "#888",
+                  color: "var(--subtle)",
                 }}>
                 Empty Page
               </div>
