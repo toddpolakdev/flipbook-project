@@ -1,36 +1,259 @@
-:root {
-  --background: #f4f5f7;
-  --foreground: #1f2937;
+/* =========================================================================
+   Flipbook design system — shadcn/ui token vocabulary.
+
+   Dark is the default. Light is a pure token swap: no component knows which
+   theme is active, so a new color only ever needs editing in this file.
+
+   Theme is keyed off `data-mantine-color-scheme` (set on <html> by Mantine's
+   ColorSchemeScript + MantineProvider), so Mantine components and these
+   tokens always agree and there is a single source of truth for the toggle.
+   ========================================================================= */
+
+:root,
+:root[data-mantine-color-scheme="dark"] {
+  /* Surfaces */
+  --background: #09090b;
+  --background-alt: #0c0c0f;
+  --card: #101014;
+  --card-hi: #16161b;
+  --popover: #101014;
+  --muted: #18181b;
+  --muted-foreground: #a1a1aa;
+
+  /* Text */
+  --foreground: #fafafa;
+  --foreground-dim: #d4d4d8;
+  --subtle: #71717a;
+
+  /* Lines */
+  --border: #27272a;
+  --border-hi: #3f3f46;
+  --input: #27272a;
+
+  /* Brand — violet → indigo */
+  --primary: #8b5cf6;
+  --primary-hi: #a78bfa;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(139, 92, 246, 0.14);
+  --primary-line: rgba(139, 92, 246, 0.38);
+  --ring: rgba(139, 92, 246, 0.55);
+
+  --gradient: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 45%, #6366f1 100%);
+  --gradient-text: linear-gradient(
+    120deg,
+    #fafafa 0%,
+    #c4b5fd 45%,
+    #818cf8 100%
+  );
+
+  /* Status */
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.12);
+  --success-line: rgba(52, 211, 153, 0.32);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.12);
+  --danger-line: rgba(248, 113, 113, 0.35);
+
+  /* Ambient glow behind the page */
+  --glow-a: rgba(139, 92, 246, 0.22);
+  --glow-b: rgba(99, 102, 241, 0.16);
+  --grid-line: rgba(255, 255, 255, 0.028);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 24px 60px rgba(0, 0, 0, 0.6);
+  --shadow-primary: 0 6px 24px rgba(139, 92, 246, 0.35);
+
+  color-scheme: dark;
 }
 
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
+:root[data-mantine-color-scheme="light"] {
+  --background: #ffffff;
+  --background-alt: #fafafa;
+  --card: #ffffff;
+  --card-hi: #fafafa;
+  --popover: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  --foreground: #09090b;
+  --foreground-dim: #3f3f46;
+  --subtle: #8b8b94;
+
+  --border: #e4e4e7;
+  --border-hi: #d4d4d8;
+  --input: #e4e4e7;
+
+  --primary: #7c3aed;
+  --primary-hi: #6d28d9;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(124, 58, 237, 0.09);
+  --primary-line: rgba(124, 58, 237, 0.28);
+  --ring: rgba(124, 58, 237, 0.45);
+
+  --gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 45%, #4f46e5 100%);
+  --gradient-text: linear-gradient(
+    120deg,
+    #18181b 0%,
+    #6d28d9 50%,
+    #4338ca 100%
+  );
+
+  --success: #059669;
+  --success-soft: rgba(5, 150, 105, 0.1);
+  --success-line: rgba(5, 150, 105, 0.28);
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.08);
+  --danger-line: rgba(220, 38, 38, 0.28);
+
+  --glow-a: rgba(139, 92, 246, 0.16);
+  --glow-b: rgba(99, 102, 241, 0.1);
+  --grid-line: rgba(9, 9, 11, 0.035);
+
+  --shadow-sm: 0 1px 2px rgba(9, 9, 11, 0.05);
+  --shadow: 0 1px 2px rgba(9, 9, 11, 0.05), 0 8px 24px rgba(9, 9, 11, 0.07);
+  --shadow-lg: 0 1px 2px rgba(9, 9, 11, 0.05), 0 24px 56px rgba(9, 9, 11, 0.1);
+  --shadow-primary: 0 6px 20px rgba(124, 58, 237, 0.28);
+
+  color-scheme: light;
+}
+
+/* Shape + motion — identical across themes. */
+:root {
+  --radius: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --maxw: 1200px;
+  --gutter: clamp(1rem, 4vw, 2rem);
+  --nav-h: 3.75rem;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas,
+    monospace;
+}
+
+/* Mantine bridge ---------------------------------------------------------
+   The editor is built almost entirely from Mantine components. Pointing
+   Mantine's own variables at the tokens above means those components follow
+   the theme toggle for free, instead of falling back to Mantine's stock
+   palette and reading as a different app. Doubled `:root:root` so these win
+   over Mantine's own `:root[data-mantine-color-scheme="…"]` rules regardless
+   of stylesheet order.
+   ------------------------------------------------------------------------ */
+:root:root[data-mantine-color-scheme] {
+  --mantine-color-body: var(--card);
+  --mantine-color-text: var(--foreground);
+  --mantine-color-dimmed: var(--muted-foreground);
+  --mantine-color-default: var(--card);
+  --mantine-color-default-hover: var(--muted);
+  --mantine-color-default-border: var(--border);
+  --mantine-color-default-color: var(--foreground);
+  --mantine-color-placeholder: var(--subtle);
+  --mantine-color-anchor: var(--primary);
+  --mantine-color-error: var(--danger);
+
+  --mantine-font-family: var(--font-sans);
+  --mantine-font-family-headings: var(--font-sans);
+  --mantine-font-family-monospace: var(--font-mono);
+  --mantine-radius-default: var(--radius);
+}
+
+/* Inputs should sit recessed against the panel they live in. */
+:root:root .mantine-Input-input,
+:root:root .mantine-InputWrapper-input {
+  background-color: var(--background-alt);
+  border-color: var(--input);
+}
+
+:root:root .mantine-Input-input:focus,
+:root:root .mantine-Input-input:focus-within {
+  border-color: var(--primary);
+}
+
+/* Accordion chrome inside the editor panels. */
+:root:root .mantine-Accordion-control:hover {
+  background-color: var(--muted);
+}
+
+:root:root .mantine-Accordion-item {
+  background-color: transparent;
+  border-color: var(--border);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+}
 
+html {
   overflow-y: scroll;
   scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  color: var(--foreground);
+  min-height: 100svh;
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s var(--ease), color 0.3s var(--ease);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+/* Ambient backdrop: faint grid + a violet bloom off the top. Sits above the
+   background color, below every piece of content. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px) 0 0 /
+      64px 64px,
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px) 0 0 /
+      64px 64px,
+    radial-gradient(
+      ellipse 80% 55% at 50% -10%,
+      var(--glow-a) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 60% 45% at 85% 5%,
+      var(--glow-b) 0%,
+      transparent 60%
+    );
+  /* Fade the grid out down the page so only the hero area reads as textured. */
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
 }
 
 a {
@@ -38,8 +261,61 @@ a {
   text-decoration: none;
 }
 
-/* @media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* Scrollbar --------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background-alt);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hi);
+  border-radius: 10px;
+  border: 2px solid var(--background-alt);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
-} */
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

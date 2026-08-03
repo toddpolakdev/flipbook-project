@@ -2,16 +2,14 @@
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { ActionIcon, Badge, Button } from "@mantine/core";
-import { Plus, Trash2 } from "lucide-react";
+import { signIn, useSession } from "next-auth/react";
+import { ArrowRight, BookOpen, Images, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import styles from "./home.module.css";
 import { FlipBook } from "@/types/flipbook";
 import FlipbookCard from "@/components/FlipbookCard/FlipbookCard";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { PUBLIC_FLIPBOOKS, MY_FLIPBOOKS } from "./graphql/queries";
-import Loader from "@/components/Loader/Loader";
 
 const REORDER_FLIPBOOKS = gql`
   mutation ReorderFlipBooks($ids: [ID!]!) {
@@ -50,6 +48,11 @@ export default function HomePage() {
   const publicList: FlipBook[] = (publicData?.flipBooks ?? []).filter(
     (fb: FlipBook) => !email || fb.userEmail !== email,
   );
+
+  // Only block the grid on the very first fetch; background refetches from
+  // cache-and-network should never blank out content already on screen.
+  const publicFirstLoad = publicLoading && !publicData;
+  const myFirstLoad = myLoading && !myData;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragEnd = async (result: any) => {
@@ -91,133 +94,229 @@ export default function HomePage() {
     }
   };
 
-  const cardMedia = (fb: FlipBook) =>
-    fb.images?.[0] ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={fb.images[0]} alt={fb.title} className={styles.thumbnail} />
-    ) : (
-      <div className={styles.placeholder}>No image</div>
+  /* ---------------------------------------------------------------- signed in */
+  if (session) {
+    const published = myFlipbooks.filter(
+      (fb) => fb.status === "published",
+    ).length;
+    const pages = myFlipbooks.reduce(
+      (sum, fb) => sum + (fb.images?.length ?? 0),
+      0,
     );
+    const firstName = session.user?.name?.split(" ")[0];
 
-  return (
-    <main className={styles.container}>
-      {session ? (
-        <>
-          <div className={styles.sectionHeader}>
-            <h1 className={styles.heading}>Your flipbooks</h1>
-            <Button
-              component={Link}
-              href="/flipbook/new"
-              leftSection={<Plus size={16} />}>
-              New flipbook
-            </Button>
-          </div>
-
-          {myFlipbooks.length === 0 ? (
-            <p className={styles.empty}>
-              You haven&apos;t created any flipbooks yet. Start one with{" "}
-              <strong>New flipbook</strong>.
+    return (
+      <main className={styles.container}>
+        <section className={styles.dashHead}>
+          <div>
+            <h1 className={styles.dashTitle}>
+              {firstName ? `Welcome back, ${firstName}` : "Your flipbooks"}
+            </h1>
+            <p className={styles.dashSub}>
+              Drag a card to reorder. Changes save automatically.
             </p>
-          ) : (
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="myFlipbooks" direction="horizontal">
-                {(provided) => (
-                  <div
-                    className={styles.grid}
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}>
-                    {myFlipbooks.map((fb, i) => (
-                      <Draggable key={fb.id} draggableId={fb.id} index={i}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}>
-                            <FlipbookCard index={i}>
-                              <div className={styles.mediaWrap}>
-                                {cardMedia(fb)}
-                                <Badge
-                                  className={styles.statusBadge}
-                                  variant="light"
-                                  color={
-                                    fb.status === "published" ? "teal" : "gray"
-                                  }>
-                                  {fb.status === "published"
-                                    ? "Public"
-                                    : "Draft"}
-                                </Badge>
-                              </div>
-                              <h2>{fb.title || fb.slug}</h2>
-                              <p>{fb.description || "No description available."}</p>
-                              <div className={styles.actions}>
-                                <Link href={`/flipbook/${fb.slug}`}>View</Link>
-                                <Link href={`/flipbook/${fb.slug}/edit`}>
-                                  Edit
-                                </Link>
-                                <ActionIcon
-                                  variant="light"
-                                  color="red"
-                                  size="lg"
-                                  onClick={() => handleDelete(fb)}
-                                  aria-label={`Delete ${fb.title || fb.slug}`}>
-                                  <Trash2 size={16} />
-                                </ActionIcon>
-                              </div>
-                            </FlipbookCard>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          )}
-
-          {publicList.length > 0 && (
-            <>
-              <h2 className={styles.subheading}>Published by others</h2>
-              <div className={styles.grid}>
-                {publicList.map((fb, i) => (
-                  <FlipbookCard key={fb.id} index={i}>
-                    <div className={styles.mediaWrap}>{cardMedia(fb)}</div>
-                    <h2>{fb.title || fb.slug}</h2>
-                    <p>{fb.description || "No description available."}</p>
-                    <div className={styles.actions}>
-                      <Link href={`/flipbook/${fb.slug}`}>View</Link>
-                    </div>
-                  </FlipbookCard>
-                ))}
-              </div>
-            </>
-          )}
-        </>
-      ) : (
-        <>
-          <div className={styles.sectionHeader}>
-            <h1 className={styles.heading}>Published flipbooks</h1>
           </div>
-          {!publicLoading && publicList.length === 0 ? (
-            <p className={styles.empty}>No published flipbooks yet.</p>
-          ) : (
+          <Link href="/flipbook/new" className={styles.btnPrimary}>
+            <Plus size={16} />
+            New flipbook
+          </Link>
+        </section>
+
+        <section className={styles.stats}>
+          <Stat label="Flipbooks" value={myFlipbooks.length} icon={<BookOpen size={13} />} />
+          <Stat label="Published" value={published} icon={<Sparkles size={13} />} />
+          <Stat label="Drafts" value={myFlipbooks.length - published} icon={<Images size={13} />} />
+          <Stat label="Total pages" value={pages} icon={<Images size={13} />} />
+        </section>
+
+        <SectionHeading title="Your flipbooks" count={myFlipbooks.length} />
+
+        {myFirstLoad ? (
+          <SkeletonGrid count={3} />
+        ) : myFlipbooks.length === 0 ? (
+          <div className={styles.empty}>
+            <span className={styles.emptyIcon}>
+              <BookOpen size={20} />
+            </span>
+            <h3>No flipbooks yet</h3>
+            <p>
+              Upload a set of images and Flipbook turns them into a book you can
+              share with a link.
+            </p>
+            <Link href="/flipbook/new" className={styles.btnPrimary}>
+              <Plus size={16} />
+              Create your first flipbook
+            </Link>
+          </div>
+        ) : (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="myFlipbooks" direction="horizontal">
+              {(provided) => (
+                <div
+                  className={styles.grid}
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}>
+                  {myFlipbooks.map((fb, i) => (
+                    <Draggable key={fb.id} draggableId={fb.id} index={i}>
+                      {(dragProvided, snapshot) => (
+                        <div
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          data-dragging={snapshot.isDragging}
+                          className={styles.draggable}>
+                          <FlipbookCard
+                            fb={fb}
+                            index={i}
+                            owned
+                            onDelete={handleDelete}
+                            dragHandleProps={dragProvided.dragHandleProps}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
+
+        {publicList.length > 0 && (
+          <>
+            <SectionHeading
+              title="Published by others"
+              count={publicList.length}
+            />
             <div className={styles.grid}>
               {publicList.map((fb, i) => (
-                <FlipbookCard key={fb.id} index={i}>
-                  <div className={styles.mediaWrap}>{cardMedia(fb)}</div>
-                  <h2>{fb.title || fb.slug}</h2>
-                  <p>{fb.description || "No description available."}</p>
-                  <div className={styles.actions}>
-                    <Link href={`/flipbook/${fb.slug}`}>View</Link>
-                  </div>
-                </FlipbookCard>
+                <FlipbookCard key={fb.id} fb={fb} index={i} />
               ))}
             </div>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </main>
+    );
+  }
 
-      {(publicLoading || myLoading) && <Loader />}
+  /* --------------------------------------------------------------- signed out */
+  return (
+    <main className={styles.container}>
+      <section className={styles.hero}>
+        <span className={styles.pill}>
+          <span className={styles.pillDot} aria-hidden="true" />
+          Images in, flipbook out
+        </span>
+
+        <h1 className={styles.heroTitle}>
+          Turn your images into a{" "}
+          <span className={styles.gradientText}>flipbook</span> worth sharing
+        </h1>
+
+        <p className={styles.heroSub}>
+          Upload a set of pages, tune the flip physics, and publish. Anyone with
+          the link gets a real page-turning book in the browser — no plugin, no
+          download.
+        </p>
+
+        <div className={styles.heroActions}>
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            onClick={() => signIn("google")}>
+            Get started free
+            <ArrowRight size={16} />
+          </button>
+          <a href="#gallery" className={styles.btnSecondary}>
+            Browse flipbooks
+          </a>
+        </div>
+
+        <ul className={styles.heroFeatures}>
+          <li>Drag-and-drop page ordering</li>
+          <li>Hosted image uploads</li>
+          <li>Share with a single link</li>
+        </ul>
+      </section>
+
+      <section id="gallery" className={styles.gallery}>
+        <SectionHeading
+          title="Published flipbooks"
+          count={publicFirstLoad ? undefined : publicList.length}
+        />
+
+        {publicFirstLoad ? (
+          <SkeletonGrid count={6} />
+        ) : publicList.length === 0 ? (
+          <div className={styles.empty}>
+            <span className={styles.emptyIcon}>
+              <Images size={20} />
+            </span>
+            <h3>Nothing published yet</h3>
+            <p>Be the first — sign in and publish a flipbook.</p>
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {publicList.map((fb, i) => (
+              <FlipbookCard key={fb.id} fb={fb} index={i} />
+            ))}
+          </div>
+        )}
+      </section>
     </main>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+
+function SectionHeading({
+  title,
+  count,
+}: {
+  title: string;
+  count?: number;
+}) {
+  return (
+    <div className={styles.sectionHeading}>
+      <h2>{title}</h2>
+      {count !== undefined && <span className={styles.count}>{count}</span>}
+      <span className={styles.rule} aria-hidden="true" />
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className={styles.stat}>
+      <span className={styles.statLabel}>
+        {icon}
+        {label}
+      </span>
+      <span className={styles.statValue}>{value}</span>
+    </div>
+  );
+}
+
+function SkeletonGrid({ count }: { count: number }) {
+  return (
+    <div className={styles.grid} aria-hidden="true">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className={styles.skeletonCard}>
+          <div className={styles.skeletonMedia} />
+          <div className={styles.skeletonBody}>
+            <div className={styles.skeletonLine} />
+            <div className={styles.skeletonLineShort} />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

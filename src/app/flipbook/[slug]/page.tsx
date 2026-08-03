@@ -2,7 +2,10 @@
 
 import { gql, useQuery } from "@apollo/client";
 import { useParams } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import PageFlipper from "@/components/PageFlipper";
+import Loader from "@/components/Loader/Loader";
 import styles from "./view.module.css";
 
 const FLIPBOOK_BY_SLUG = gql`
@@ -32,24 +35,59 @@ export default function FlipBookPage() {
     fetchPolicy: "cache-and-network",
   });
 
-  if (loading) return <p>Loading flipbook…</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  // Only block on the first fetch; cache-and-network refetches keep the book
+  // on screen rather than flashing the loader over it.
+  if (loading && !data) return <Loader />;
+
+  if (error) {
+    return (
+      <div className={styles.state}>
+        <h1 className={styles.stateTitle}>Couldn&apos;t load this flipbook</h1>
+        <p className={styles.stateBody}>{error.message}</p>
+        <Link href="/" className={styles.stateLink}>
+          <ArrowLeft size={15} />
+          Back to home
+        </Link>
+      </div>
+    );
+  }
 
   const flipBook = data?.flipBookBySlug;
-  if (!flipBook) return <p>Flipbook not found.</p>;
+
+  if (!flipBook) {
+    return (
+      <div className={styles.state}>
+        <h1 className={styles.stateTitle}>Flipbook not found</h1>
+        <p className={styles.stateBody}>
+          Nothing lives at <strong>/{slug}</strong>. It may have been deleted or
+          never published.
+        </p>
+        <Link href="/" className={styles.stateLink}>
+          <ArrowLeft size={15} />
+          Back to home
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <main className={styles.container}>
-      <h1 className={styles.heading}>{flipBook.title}</h1>
-      <p className={styles.description}>{flipBook.description}</p>
+      <div className={styles.head}>
+        <h1 className={styles.heading}>{flipBook.title}</h1>
+        {flipBook.description && (
+          <p className={styles.description}>{flipBook.description}</p>
+        )}
+      </div>
 
-      <PageFlipper
-        images={flipBook.images}
-        width={flipBook.settings?.width || 400}
-        height={flipBook.settings?.height || 600}
-        backgroundColor={flipBook.settings?.backgroundColor || "#701919ff"}
-        showPageNumbers={flipBook.settings?.showPageNumbers ?? true}
-      />
+      <div className={styles.stage}>
+        <PageFlipper
+          images={flipBook.images}
+          width={flipBook.settings?.width || 400}
+          height={flipBook.settings?.height || 600}
+          backgroundColor={flipBook.settings?.backgroundColor || "#701919ff"}
+          showPageNumbers={flipBook.settings?.showPageNumbers ?? true}
+        />
+      </div>
     </main>
   );
 }

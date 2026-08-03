@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { BookOpen, Menu, X } from "lucide-react";
 import styles from "./Navbar.module.css";
 import AuthButton from "../AuthButton/AuthButton";
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -16,46 +17,70 @@ export default function NavBar() {
   const editMatch = pathname.match(/^\/flipbook\/([^/]+)\/edit$/);
   const editslug = editMatch ? editMatch[1] : null;
 
+  // A route change should never leave the mobile panel hanging open.
+  useEffect(() => setOpen(false), [pathname]);
+
+  const links = [
+    { href: "/", label: "Home" },
+    { href: "/flipbook/new", label: "New flipbook" },
+    ...(currentSlug && currentSlug !== "new"
+      ? [{ href: `/flipbook/${currentSlug}/edit`, label: "Edit" }]
+      : []),
+    ...(editslug ? [{ href: `/flipbook/${editslug}`, label: "View" }] : []),
+  ];
+
   return (
-    <nav className={styles.nav}>
+    <header className={styles.nav}>
       <div className={styles.inner}>
-        <Link href={`/`} className={styles.logo}>
-          Flipbook
+        <Link href="/" className={styles.logo}>
+          <span className={styles.logoMark} aria-hidden="true">
+            <BookOpen size={15} strokeWidth={2.4} />
+          </span>
+          <span className={styles.logoText}>Flipbook</span>
         </Link>
-        <div className={styles.links}>
-          <Link href={`/`}>Home</Link>
-          <Link href={`/flipbook/new`}>New Flipbook</Link>
 
-          {currentSlug && currentSlug !== "new" && (
-            <Link href={`/flipbook/${currentSlug}/edit`}>Edit</Link>
-          )}
-
-          {editslug && (
-            <Link href={`/flipbook/${editslug}`} onClick={() => setOpen(false)}>
-              View
+        <nav className={styles.links} aria-label="Main">
+          {links.map((l) => (
+            <Link
+              key={l.href + l.label}
+              href={l.href}
+              data-active={pathname === l.href}>
+              {l.label}
             </Link>
-          )}
+          ))}
+        </nav>
+
+        <div className={styles.right}>
+          <ThemeToggle />
+          <div className={styles.authDesktop}>
+            <AuthButton />
+          </div>
+          <button
+            className={styles.menuButton}
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}
+            aria-label="Toggle menu">
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
-
-        <AuthButton />
-
-        <button
-          className={styles.menuButton}
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle Menu">
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
       </div>
+
       {open && (
         <div className={styles.mobileMenu}>
-          <Link href={`/`} onClick={() => setOpen(false)}>
-            Home
-          </Link>
-          <Link href={`/flipbook/new`} onClick={() => setOpen(false)}>
-            New Flipbook
-          </Link>
+          {links.map((l) => (
+            <Link
+              key={l.href + l.label}
+              href={l.href}
+              data-active={pathname === l.href}
+              onClick={() => setOpen(false)}>
+              {l.label}
+            </Link>
+          ))}
+          <div className={styles.mobileAuth}>
+            <AuthButton />
+          </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

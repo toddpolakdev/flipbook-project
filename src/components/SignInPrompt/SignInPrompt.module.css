@@ -1,18 +1,27 @@
 .wrap {
-  max-width: 420px;
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
   margin: 6rem auto;
-  padding: 0 1rem;
+  padding: 2.5rem 1.75rem;
   text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--shadow);
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
-  color: #1f2937;
+  color: var(--foreground);
 }
 
 .message {
-  color: #6b7280;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  line-height: 1.6;
   margin-bottom: 1.5rem;
 }

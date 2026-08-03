@@ -135,11 +135,25 @@ export default function EditFlipBookPage() {
   if (loading || authStatus === "loading") return <Loader />;
   if (!session)
     return <SignInPrompt message="Please sign in to edit flipbooks." />;
-  if (error) return <p>Error: {error.message}</p>;
+  if (error)
+    return (
+      <SignInPrompt
+        title="Couldn't load this flipbook"
+        message={error.message}
+        showSignIn={false}
+      />
+    );
 
   const flipBook = data?.flipBookBySlug;
 
-  if (!flipBook) return <p>Flipbook not found</p>;
+  if (!flipBook)
+    return (
+      <SignInPrompt
+        title="Flipbook not found"
+        message="This flipbook may have been deleted, or the link is wrong."
+        showSignIn={false}
+      />
+    );
 
   // You can only edit your own flipbooks (legacy ownerless ones are claimable).
   if (flipBook.userEmail && flipBook.userEmail !== session.user?.email) {

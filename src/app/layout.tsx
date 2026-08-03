@@ -1,11 +1,16 @@
 import ApolloWrapper from "../../components/ApolloProvider";
-import { MantineProvider, createTheme } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  createTheme,
+  type MantineColorsTuple,
+} from "@mantine/core";
 import "@mantine/core/styles.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/Navbar/Navbar";
-import { Toaster } from "sonner";
+import ThemedToaster from "@/components/ThemedToaster/ThemedToaster";
 import Providers from "../../components/SessionProvider";
 
 const geistSans = Geist({
@@ -19,52 +24,40 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flipbook",
-  description: "Create and share page-flip flipbooks.",
+  title: "Flipbook — create and share page-flip books",
+  description:
+    "Turn a folder of images into a flipbook you can share with a link. No install, no plugin.",
 };
 
+/* Brand accent — violet, mirroring --primary in globals.css. Shade 5 is the
+   dark-mode accent, shade 6 the light-mode one. */
+const brand: MantineColorsTuple = [
+  "#f5f3ff",
+  "#ede9fe",
+  "#ddd6fe",
+  "#c4b5fd",
+  "#a78bfa",
+  "#8b5cf6",
+  "#7c3aed",
+  "#6d28d9",
+  "#5b21b6",
+  "#4c1d95",
+];
+
 const flipbookTheme = createTheme({
-  fontFamily:
-    "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+  fontFamily: "var(--font-sans)",
+  fontFamilyMonospace: "var(--font-mono)",
 
   headings: {
-    fontFamily:
-      "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+    fontFamily: "var(--font-sans)",
     fontWeight: "600",
   },
 
-  primaryColor: "flipbookBlue", // used by buttons, switches, highlights
-  defaultRadius: "md", // consistent rounded corners
+  primaryColor: "brand",
+  primaryShade: { light: 6, dark: 5 },
+  defaultRadius: "md",
 
-  colors: {
-    // Accent — muted slate indigo (toned down from the old bright blue)
-    flipbookBlue: [
-      "#eef0f6", // 0 – lightest
-      "#d9deea",
-      "#b6c0d5",
-      "#909ebd",
-      "#7181a4",
-      "#556791", // 5 – main
-      "#47587f",
-      "#3a4867",
-      "#2f3a52",
-      "#252d3f", // 9 – darkest
-    ],
-
-    // Neutral palette (matches your current gray backgrounds/borders)
-    softGray: [
-      "#f9fafb", // background
-      "#f3f4f6", // panels
-      "#e5e7eb", // borders
-      "#d1d5db",
-      "#9ca3af", // muted text
-      "#6b7280",
-      "#4b5563",
-      "#374151",
-      "#1f2937",
-      "#111827", // darkest text
-    ],
-  },
+  colors: { brand },
 
   // Default props for consistent look
   components: {
@@ -112,7 +105,7 @@ const flipbookTheme = createTheme({
       defaultProps: {
         radius: "xl",
         size: "lg",
-        color: "flipbookBlue",
+        color: "brand",
       },
     },
     Accordion: {
@@ -130,15 +123,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      data-mantine-color-scheme="dark"
+      suppressHydrationWarning>
+      <head>
+        <ColorSchemeScript defaultColorScheme="dark" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ApolloWrapper>
-          <MantineProvider defaultColorScheme="light" theme={flipbookTheme}>
+          <MantineProvider defaultColorScheme="dark" theme={flipbookTheme}>
             <Providers>
               <NavBar />
               {children}
             </Providers>
-            <Toaster position="top-right" richColors closeButton />
+            <ThemedToaster />
           </MantineProvider>
         </ApolloWrapper>
       </body>
